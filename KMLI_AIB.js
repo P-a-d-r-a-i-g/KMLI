@@ -4,7 +4,7 @@
 // @author P-a-d-r-a-i-g
 // @version 2024.03.10.1
 // @description Keeps login session alive in AIB online banking for 1 hour if the user wishes it.
-// @match https://onlinebanking.aib.ie/*
+// @match https://onlinebanking.aib.ie/inet/roi/*
 // @grant none
 // @homepage https://github.com/P-a-d-r-a-i-g/KMLI
 // @downloadURL https://raw.githubusercontent.com/P-a-d-r-a-i-g/KMLI/main/KMLI_AIB.js
