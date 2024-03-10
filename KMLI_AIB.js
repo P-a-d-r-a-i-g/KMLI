@@ -5,6 +5,8 @@
 // @version 2024.03.10.1
 // @description Keeps login session alive in AIB online banking for 1 hour if the user wishes it.
 // @match https://onlinebanking.aib.ie/inet/roi/*
+// @exclude https://onlinebanking.aib.ie/inet/roi/timeout.htm
+// @exclude https://onlinebanking.aib.ie/inet/roi/login.htm
 // @grant none
 // @homepage https://github.com/P-a-d-r-a-i-g/KMLI
 // @downloadURL https://raw.githubusercontent.com/P-a-d-r-a-i-g/KMLI/main/KMLI_AIB.js
@@ -22,10 +24,7 @@
 
     // Function to keep user logged in.
     function keepMeLoggedIn() {
-        if (typeof myns !== 'undefined') {
-            // Do the work to keep the user logged into the website here.
-            //myns.myfunctions.keepUserLoggedInFunction();
-        }
+        refreshSession();
     }
 
     // Function to set an item in localStorage with a specified expiration time in seconds
