@@ -2,8 +2,8 @@
 // @name KMLI_AIB
 // @namespace ns_KMLI_AIB
 // @author P-a-d-r-a-i-g
-// @version 2023.12.22.1
-// @description Keeps session alive for 1 hour if the user wishes it.
+// @version 2024.03.10.1
+// @description Keeps login session alive in AIB online banking for 1 hour if the user wishes it.
 // @match https://onlinebanking.aib.ie/*
 // @grant none
 // @homepage https://github.com/P-a-d-r-a-i-g/KMLI
