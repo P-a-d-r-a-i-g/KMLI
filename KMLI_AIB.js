@@ -2,7 +2,7 @@
 // @name KMLI_AIB
 // @namespace ns_KMLI_AIB
 // @author P-a-d-r-a-i-g
-// @version 2024.03.10.3
+// @version 2024.03.12.1
 // @description Keeps login session alive in AIB online banking for 1 hour if the user wishes it.
 // @match https://onlinebanking.aib.ie/inet/roi/*
 // @exclude https://onlinebanking.aib.ie/inet/roi/timeout.htm
@@ -20,7 +20,7 @@
     let keepMeLoggedInInterval; // To hold the keepMeLoggedIn reference
     let keepMeLoggedInIntervalTimeInSeconds = 60; // Execute the function every X seconds
     let askToStayLoggedInInterval; // To hold the askToStayLoggedInInterval reference
-    let askToStayLoggedInIntervalTimeInSeconds = 60 * 60; // The time in seconds to ask the user if the want to continue staying logged in
+    let askToStayLoggedInIntervalTimeInSeconds = 60 * 60; // The time in seconds to ask the user if they want to continue staying logged in
 
     // Function to keep user logged in.
     function keepMeLoggedIn() {
@@ -117,7 +117,6 @@
             newPageConfirmTimeoutId = null;
         }
 
-
         // If keepMeLoggedInInterval interval is already running, clear it
         if (keepMeLoggedInInterval) {
             clearInterval(keepMeLoggedInInterval);
@@ -141,6 +140,59 @@
             askToStayLoggedInInterval = setInterval(askTheUserFunction, askToStayLoggedInIntervalTimeInSeconds * 1000); // 60 minutes
         });
     }
+    
+    function displayCountdownTimer() {
+        const expiryTime = getLocalStorageWithExpiryExpiryTime('keepUserLoggedInAnswer');
+        const countdownTimerElement = document.getElementById('countdown-timer');
+
+        if (expiryTime && countdownTimerElement) {
+            const now = Date.now();
+            const timeRemaining = expiryTime - now;
+
+            if (timeRemaining > 0) {
+                const secondsRemaining = Math.ceil(timeRemaining / 1000);
+                const hours = Math.floor(secondsRemaining / 3600);
+                const minutes = Math.floor((secondsRemaining % 3600) / 60);
+                const seconds = secondsRemaining % 60;
+
+                const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                countdownTimerElement.textContent = formattedTime;
+            } else {
+                countdownTimerElement.textContent = 'Expired';
+            }
+        } else if (countdownTimerElement) {
+            countdownTimerElement.textContent = 'Not set';
+        }
+    }
+
+    function createCountdownTimerBox() {
+        const countdownTimerBox = document.createElement('div');
+        countdownTimerBox.id = 'countdown-timer-box';
+        countdownTimerBox.style.position = 'fixed';
+        countdownTimerBox.style.bottom = '20px';
+        countdownTimerBox.style.right = '20px';
+        countdownTimerBox.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        countdownTimerBox.style.padding = '10px 20px';
+        countdownTimerBox.style.border = '1px solid #ccc';
+        countdownTimerBox.style.borderRadius = '5px';
+        countdownTimerBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+        
+        const countdownTimerLabel = document.createElement('span');
+        countdownTimerLabel.textContent = 'KMLI:';
+        
+        const countdownTimer = document.createElement('span');
+        countdownTimer.id = 'countdown-timer';
+        
+        countdownTimerBox.appendChild(countdownTimerLabel);
+        countdownTimerBox.appendChild(countdownTimer);
+        document.body.appendChild(countdownTimerBox);
+    }
+
+    // Create the countdown timer box
+    createCountdownTimerBox();
+
+    // Update the countdown timer every 1 second
+    setInterval(displayCountdownTimer, 1000);
 
     // initial call
     setTimeout(askTheUserFunction, 1 * 1000);
