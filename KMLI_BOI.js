@@ -2,7 +2,7 @@
 // @name KMLI_BOI
 // @namespace ns_KMLI_BOI
 // @author P-a-d-r-a-i-g
-// @version 2024.03.12.1
+// @version 2024.03.12.2
 // @description Keeps login session alive in BOI 365 online banking for 1 hour if the user wishes it.
 // @match https://www.365online.com/Digital/servletcontroller
 // @grant none
