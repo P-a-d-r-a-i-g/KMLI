@@ -2,7 +2,7 @@
 // @name KMLI_OKTA
 // @namespace ns_KMLI_OKTA
 // @author P-a-d-r-a-i-g
-// @version 2024.03.13.1
+// @version 2024.12.18.1
 // @description Keeps login session alive in OKTA for 1 hour if the user wishes it.
 // @match https://*.okta.com/admin/*
 // @match https://*.okta.com/app/*
@@ -110,19 +110,22 @@
         document.body.appendChild(dialogContainer);
     }
 
-    function askTheUserFunction() {
-        const keepUserLoggedInAnswer = getLocalStorageWithExpiry('keepUserLoggedInAnswer');
+    function askTheUserFunction(force) {
+        if (!force) {
+          const keepUserLoggedInAnswer = getLocalStorageWithExpiry('keepUserLoggedInAnswer');
 
-        if (keepUserLoggedInAnswer) {
-            if (keepUserLoggedInAnswer === 'yup') {
-                // Start calling keepMeLoggedIn every keepMeLoggedInIntervalTimeInSeconds seconds
-                keepMeLoggedInInterval = setInterval(keepMeLoggedIn, keepMeLoggedInIntervalTimeInSeconds * 1000);
-            }
-            // since we have already confirmed, and we are probably on a new page too, so call this function a little after the confirmation expires
-            if (!newPageConfirmTimeoutId) {
-                newPageConfirmTimeoutId = setTimeout(askTheUserFunction, getLocalStorageWithExpiryExpiryTime('keepUserLoggedInAnswer') - Date.now() + (10 * 1000));
-            }
-            return;
+          if (keepUserLoggedInAnswer) {
+              if (keepUserLoggedInAnswer === 'Yes') {
+                  // Start calling keepMeLoggedIn every keepMeLoggedInIntervalTimeInSeconds seconds
+                  keepMeLoggedInInterval = setInterval(keepMeLoggedIn, keepMeLoggedInIntervalTimeInSeconds * 1000);
+              }
+              // since we have already confirmed, and we are probably on a new page too, so call this function a little after the confirmation expires
+              if (!newPageConfirmTimeoutId) {
+                  newPageConfirmTimeoutId = setTimeout(askTheUserFunction, getLocalStorageWithExpiryExpiryTime('keepUserLoggedInAnswer') - Date.now() + (10 * 1000));
+              }
+              return;
+          }
+
         }
 
         // If keepMeLoggedInInterval interval is already running, clear it
@@ -147,14 +150,14 @@
             if (response) {
                 // Start calling keepMeLoggedIn every keepMeLoggedInIntervalTimeInSeconds seconds
                 keepMeLoggedInInterval = setInterval(keepMeLoggedIn, keepMeLoggedInIntervalTimeInSeconds * 1000);
-                setLocalStorageWithExpiry('keepUserLoggedInAnswer', 'yup', askToStayLoggedInIntervalTimeInSeconds);
+                setLocalStorageWithExpiry('keepUserLoggedInAnswer', 'Yes', askToStayLoggedInIntervalTimeInSeconds);
             } else {
-                setLocalStorageWithExpiry('keepUserLoggedInAnswer', 'nope', askToStayLoggedInIntervalTimeInSeconds);
+                setLocalStorageWithExpiry('keepUserLoggedInAnswer', 'No', askToStayLoggedInIntervalTimeInSeconds);
             }
-            askToStayLoggedInInterval = setInterval(askTheUserFunction, askToStayLoggedInIntervalTimeInSeconds * 1000); // 60 minutes
+            askToStayLoggedInInterval = setInterval(askTheUserFunction, askToStayLoggedInIntervalTimeInSeconds * 1000); // ask again in 60 minutes
         });
     }
-    
+
     function displayCountdownTimer() {
         const expiryTime = getLocalStorageWithExpiryExpiryTime('keepUserLoggedInAnswer');
         const countdownTimerElement = document.getElementById('countdown-timer');
@@ -170,12 +173,12 @@
                 const seconds = secondsRemaining % 60;
 
                 const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                countdownTimerElement.textContent = formattedTime;
+                countdownTimerElement.textContent = getLocalStorageWithExpiry('keepUserLoggedInAnswer') + ' for ' + formattedTime;
             } else {
-                countdownTimerElement.textContent = 'Expired';
+                countdownTimerElement.textContent = 'Expired Timer';
             }
         } else if (countdownTimerElement) {
-            countdownTimerElement.textContent = 'Not set';
+            countdownTimerElement.textContent = 'No answer set';
         }
     }
 
@@ -190,13 +193,20 @@
         countdownTimerBox.style.border = '1px solid #ccc';
         countdownTimerBox.style.borderRadius = '5px';
         countdownTimerBox.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
-        
+
         const countdownTimerLabel = document.createElement('span');
-        countdownTimerLabel.textContent = 'KMLI:';
-        
+        countdownTimerLabel.textContent = 'KMLI: ';
+
         const countdownTimer = document.createElement('span');
         countdownTimer.id = 'countdown-timer';
-        
+
+        // Add click event listener to the countdown timer
+        countdownTimer.style.cursor = 'pointer'; // Change cursor to pointer
+        countdownTimer.addEventListener('click', function() {
+            // Call the function to show the prompt
+            askTheUserFunction(true);
+        });
+
         countdownTimerBox.appendChild(countdownTimerLabel);
         countdownTimerBox.appendChild(countdownTimer);
         document.body.appendChild(countdownTimerBox);
